@@ -93,6 +93,6 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     private void AddTag(BaseItem item)
     {
         RemoveTag(item);
-        item.Tags = [..item.Tags, $"{TagPrefix}:{DateTime.Today:yyyy-MM-dd}"];
+        item.AddTag($"{TagPrefix}:{DateTime.Today:yyyy-MM-dd}");
     }
 }
