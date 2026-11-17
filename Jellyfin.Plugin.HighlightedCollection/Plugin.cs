@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using Jellyfin.Plugin.HighlightedCollection.Configuration;
 using MediaBrowser.Common.Configuration;
