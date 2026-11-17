@@ -66,6 +66,7 @@
                 Dashboard.showLoadingMsg();
                 ApiClient.getPluginConfiguration(TemplateConfig.pluginUniqueId).then(function (config) {
                     config.Collection = document.querySelector('#Collection').value;
+                    config.Title = document.querySelector('#Collection').selectedOptions[0].text;
                     config.SortOrder = document.querySelector('#SortOrder').value;
                     ApiClient.updatePluginConfiguration(TemplateConfig.pluginUniqueId, config).then(function (result) {
                         Dashboard.processPluginConfigurationUpdateResult(result);

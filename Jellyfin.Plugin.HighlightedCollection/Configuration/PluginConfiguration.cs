@@ -44,6 +44,11 @@ public class PluginConfiguration : BasePluginConfiguration
     public Guid? Collection { get; set; }
 
     /// <summary>
+    /// Gets or sets the section title.
+    /// </summary>
+    public string? Title { get; set; }
+
+    /// <summary>
     /// Gets or sets the sort order.
     /// </summary>
     public SortOrder SortOrder { get; set; }
