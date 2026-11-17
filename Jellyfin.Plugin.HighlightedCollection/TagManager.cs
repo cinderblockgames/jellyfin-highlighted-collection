@@ -48,7 +48,7 @@ public class TagManager(Func<Guid?> getCollectionId, string tagPrefix)
     {
         item.Tags = item.Tags.Except(
                 item.Tags.Where(
-                    t => t.StartsWith(tagPrefix, StringComparison.OrdinalIgnoreCase)))
+                    tag => tag.StartsWith(tagPrefix, StringComparison.OrdinalIgnoreCase)))
             .ToArray();
     }
 
