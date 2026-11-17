@@ -1,3 +1,16 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="build.yaml" />
+    <File Path="CONTRIBUTING.md" />
+    <File Path="Directory.Build.props" />
+    <File Path="images\settings.png" />
+    <File Path="LICENSE" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/Solution Items/images/">
+    <File Path="images\leaving_soon.png" />
+    <File Path="images\Seal-of-Human-Authorship-300.png" />
+    <File Path="images\settings.png" />
+  </Folder>
   <Project Path="Jellyfin.Plugin.HighlightedCollection\Jellyfin.Plugin.HighlightedCollection.csproj" />
 </Solution>
