@@ -1,6 +1,5 @@
 todo:
-- javascript injector integration
 - get build working
-- readme
+- readme (incl. required JavaScript Injector)
 - contributing
 - plugins repo

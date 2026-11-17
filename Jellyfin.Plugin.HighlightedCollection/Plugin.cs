@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using Jellyfin.Plugin.HighlightedCollection.Configuration;
 using MediaBrowser.Common.Configuration;
@@ -7,6 +8,7 @@ using MediaBrowser.Common.Plugins;
 using MediaBrowser.Controller.Collections;
 using MediaBrowser.Model.Plugins;
 using MediaBrowser.Model.Serialization;
+using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.HighlightedCollection;
 
@@ -20,14 +22,16 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     /// </summary>
     /// <param name="applicationPaths">Instance of the <see cref="IApplicationPaths"/> interface.</param>
     /// <param name="xmlSerializer">Instance of the <see cref="IXmlSerializer"/> interface.</param>
-    /// <param name="manager">Instance of the <see cref="ICollectionManager"/> interface.</param>
-    public Plugin(IApplicationPaths applicationPaths, IXmlSerializer xmlSerializer, ICollectionManager manager)
+    /// <param name="collections">Instance of the <see cref="ICollectionManager"/> interface.</param>
+    /// <param name="logger">Instance of the <see cref="ILogger"/> interface.</param>
+    public Plugin(IApplicationPaths applicationPaths, IXmlSerializer xmlSerializer, ICollectionManager collections, ILogger<Plugin> logger)
         : base(applicationPaths, xmlSerializer)
     {
         Instance = this;
         var tagManager = new TagManager(() => Instance?.Configuration?.Collection, "highlighted");
-        manager.ItemsAddedToCollection += tagManager.ItemsAddedToCollection;
-        manager.ItemsRemovedFromCollection += tagManager.ItemsRemovedFromCollection;
+        collections.ItemsAddedToCollection += tagManager.ItemsAddedToCollection;
+        collections.ItemsRemovedFromCollection += tagManager.ItemsRemovedFromCollection;
+        ScriptManager = new ScriptManager(Instance, logger);
     }
 
     /// <inheritdoc />
@@ -37,13 +41,30 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     public override Guid Id => Guid.Parse("14D6403B-1065-4A19-9363-B258740652C6");
 
     /// <summary>
-    /// Gets the current plugin instance.
+    /// Gets or sets the current plugin instance.
     /// </summary>
-    public static Plugin? Instance { get; private set; }
+    private static Plugin? Instance { get; set; }
+
+    private ScriptManager? ScriptManager { get; set;  }
+
+    private static object Deadbolt { get; } = new object();
 
     /// <inheritdoc />
     public IEnumerable<PluginPageInfo> GetPages()
     {
+        // This is a misuse of this method, but -- it runs after all plugins are loaded, so...
+        if (ScriptManager != null)
+        {
+            lock (Deadbolt)
+            {
+                if (ScriptManager != null)
+                {
+                    ScriptManager.Register("highlighted-collection-plugin", "Scripts/highlighted-collection-plugin.js");
+                    ScriptManager = null;
+                }
+            }
+        }
+
         return
         [
             new PluginPageInfo
