@@ -13,6 +13,7 @@ category: "General"
 owner: "cinderblockgames"
 artifacts:
 - "Jellyfin.Plugin.HighlightedCollection.dll"
+- "icon.png"
 - "Scripts/highlighted-collection-plugin.js"
 changelog: >
   0.1.0.0: Initial release.
