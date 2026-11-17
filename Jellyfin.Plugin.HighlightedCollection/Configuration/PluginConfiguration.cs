@@ -1,10 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using Jellyfin.Data.Enums;
-using MediaBrowser.Controller.Collections;
-using MediaBrowser.Controller.Entities;
-using MediaBrowser.Controller.Library;
 using MediaBrowser.Model.Plugins;
 
 namespace Jellyfin.Plugin.HighlightedCollection.Configuration;

@@ -31,8 +31,6 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
         manager.ItemsRemovedFromCollection += ItemsRemovedFromCollection;
     }
 
-    private Guid CollectionId => Guid.Parse("538a277218364cba64688cf658395c0b");
-
     private string TagPrefix => "highlighted";
 
     /// <inheritdoc />
@@ -45,6 +43,8 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     /// Gets the current plugin instance.
     /// </summary>
     public static Plugin? Instance { get; private set; }
+
+    private static PluginConfiguration? Config => Instance?.Configuration;
 
     /// <inheritdoc />
     public IEnumerable<PluginPageInfo> GetPages()
@@ -61,7 +61,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
 
     private void ItemsAddedToCollection(object? sender, CollectionModifiedEventArgs args)
     {
-        if (args.Collection.Id == CollectionId)
+        if (args.Collection.Id == Config?.Collection)
         {
             foreach (var item in args.ItemsChanged)
             {
@@ -72,7 +72,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
 
     private void ItemsRemovedFromCollection(object? sender, CollectionModifiedEventArgs args)
     {
-        if (args.Collection.Id == CollectionId)
+        if (args.Collection.Id == Config?.Collection)
         {
             foreach (var item in args.ItemsChanged)
             {
