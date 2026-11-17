@@ -1,12 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using Jellyfin.Plugin.HighlightedCollection.Configuration;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;
 using MediaBrowser.Controller.Collections;
-using MediaBrowser.Controller.Entities;
 using MediaBrowser.Model.Plugins;
 using MediaBrowser.Model.Serialization;
 
@@ -27,11 +25,10 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
         : base(applicationPaths, xmlSerializer)
     {
         Instance = this;
-        manager.ItemsAddedToCollection += ItemsAddedToCollection;
-        manager.ItemsRemovedFromCollection += ItemsRemovedFromCollection;
+        var tagManager = new TagManager(() => Instance?.Configuration?.Collection, "highlighted");
+        manager.ItemsAddedToCollection += tagManager.ItemsAddedToCollection;
+        manager.ItemsRemovedFromCollection += tagManager.ItemsRemovedFromCollection;
     }
-
-    private string TagPrefix => "highlighted";
 
     /// <inheritdoc />
     public override string Name => "Highlighted Collection";
@@ -44,8 +41,6 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     /// </summary>
     public static Plugin? Instance { get; private set; }
 
-    private static PluginConfiguration? Config => Instance?.Configuration;
-
     /// <inheritdoc />
     public IEnumerable<PluginPageInfo> GetPages()
     {
@@ -57,41 +52,5 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
                 EmbeddedResourcePath = string.Format(CultureInfo.InvariantCulture, "{0}.Configuration.configPage.html", GetType().Namespace)
             }
         ];
-    }
-
-    private void ItemsAddedToCollection(object? sender, CollectionModifiedEventArgs args)
-    {
-        if (args.Collection.Id == Config?.Collection)
-        {
-            foreach (var item in args.ItemsChanged)
-            {
-                AddTag(item);
-            }
-        }
-    }
-
-    private void ItemsRemovedFromCollection(object? sender, CollectionModifiedEventArgs args)
-    {
-        if (args.Collection.Id == Config?.Collection)
-        {
-            foreach (var item in args.ItemsChanged)
-            {
-                RemoveTag(item);
-            }
-        }
-    }
-
-    private void RemoveTag(BaseItem item)
-    {
-        item.Tags = item.Tags.Except(
-            item.Tags.Where(
-                t => t.StartsWith(TagPrefix, StringComparison.OrdinalIgnoreCase)))
-                    .ToArray();
-    }
-
-    private void AddTag(BaseItem item)
-    {
-        RemoveTag(item);
-        item.AddTag($"{TagPrefix}:{DateTime.Today:yyyy-MM-dd}");
     }
 }
