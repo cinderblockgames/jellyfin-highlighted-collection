@@ -2,8 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using J2N.Collections.Generic.Extensions;
-using Jellyfin.Plugin.Template.Configuration;
+using Jellyfin.Plugin.HighlightedCollection.Configuration;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;
 using MediaBrowser.Controller.Collections;
@@ -11,7 +10,7 @@ using MediaBrowser.Controller.Entities;
 using MediaBrowser.Model.Plugins;
 using MediaBrowser.Model.Serialization;
 
-namespace Jellyfin.Plugin.Template;
+namespace Jellyfin.Plugin.HighlightedCollection;
 
 /// <summary>
 /// The main plugin.
@@ -34,7 +33,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
 
     private Guid CollectionId => Guid.Parse("538a277218364cba64688cf658395c0b");
 
-    private string TagPrefix => "atls";
+    private string TagPrefix => "highlighted";
 
     /// <inheritdoc />
     public override string Name => "Highlighted Collection";

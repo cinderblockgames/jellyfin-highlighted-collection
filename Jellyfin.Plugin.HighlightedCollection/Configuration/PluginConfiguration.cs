@@ -1,21 +1,33 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using Jellyfin.Data.Enums;
+using MediaBrowser.Controller.Collections;
+using MediaBrowser.Controller.Entities;
+using MediaBrowser.Controller.Library;
 using MediaBrowser.Model.Plugins;
 
-namespace Jellyfin.Plugin.Template.Configuration;
+namespace Jellyfin.Plugin.HighlightedCollection.Configuration;
 
 /// <summary>
-/// The configuration options.
+/// The order in which to display items from the highlighted collection.
 /// </summary>
-public enum SomeOptions
+public enum SortOrder
 {
     /// <summary>
-    /// Option one.
+    /// Default collection sorting.
     /// </summary>
-    OneOption,
+    JellyfinDefault,
 
     /// <summary>
-    /// Second option.
+    /// Date added to collection.
     /// </summary>
-    AnotherOption
+    DateAddedToCollection,
+
+    /// <summary>
+    /// Alphabetical order (using SortName).
+    /// </summary>
+    Name,
 }
 
 /// <summary>
@@ -29,29 +41,16 @@ public class PluginConfiguration : BasePluginConfiguration
     public PluginConfiguration()
     {
         // set default options here
-        Options = SomeOptions.AnotherOption;
-        TrueFalseSetting = true;
-        AnInteger = 2;
-        AString = "string";
+        SortOrder = SortOrder.DateAddedToCollection;
     }
 
     /// <summary>
-    /// Gets or sets a value indicating whether some true or false setting is enabled..
+    /// Gets or sets the highlighted collection.
     /// </summary>
-    public bool TrueFalseSetting { get; set; }
+    public Guid? Collection { get; set; }
 
     /// <summary>
-    /// Gets or sets an integer setting.
+    /// Gets or sets the sort order.
     /// </summary>
-    public int AnInteger { get; set; }
-
-    /// <summary>
-    /// Gets or sets a string setting.
-    /// </summary>
-    public string AString { get; set; }
-
-    /// <summary>
-    /// Gets or sets an enum option.
-    /// </summary>
-    public SomeOptions Options { get; set; }
+    public SortOrder SortOrder { get; set; }
 }
