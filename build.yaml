@@ -6,8 +6,8 @@ targetAbi: "12.0.0.0"
 framework: "net10.0"
 overview: "Add a collection to the top of the Jellyfin Web UI"
 description: >
-  Highlight any collection to add to your home page, such as a Leaving Soon collection.\n
-  You can set the ordering to work for your use case.\n
+  Highlight any collection to add to your home page, such as a Leaving Soon collection.
+  You can set the ordering to work for your use case.
   This is intended to be a temporary fix, just until Jellyfin supports this natively, which is theoretically coming eventually.
 category: "General"
 owner: "cinderblockgames"
@@ -15,4 +15,4 @@ artifacts:
 - "Jellyfin.Plugin.HighlightedCollection.dll"
 - "Scripts/highlighted-collection-plugin.js"
 changelog: >
-  0.1.0.0: Initial release.\n
+  0.1.0.0: Initial release.
