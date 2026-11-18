@@ -31,6 +31,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
         collections.ItemsAddedToCollection += tagManager.ItemsAddedToCollection;
         collections.ItemsRemovedFromCollection += tagManager.ItemsRemovedFromCollection;
         ScriptManager = new ScriptManager(Instance, logger);
+        Instance.ConfigurationChanged += (_, _) => ScriptManager.Register("highlighted-collection-plugin", "Scripts/highlighted-collection-plugin.js");
     }
 
     /// <inheritdoc />
@@ -48,18 +49,20 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
 
     private static object Deadbolt { get; } = new object();
 
+    private static bool Initialized { get; set; }
+
     /// <inheritdoc />
     public IEnumerable<PluginPageInfo> GetPages()
     {
         // This is a misuse of this method, but -- it runs after all plugins are loaded, so...
-        if (ScriptManager != null)
+        if (!Initialized)
         {
             lock (Deadbolt)
             {
-                if (ScriptManager != null)
+                if (!Initialized)
                 {
-                    ScriptManager.Register("highlighted-collection-plugin", "Scripts/highlighted-collection-plugin.js");
-                    ScriptManager = null;
+                    ScriptManager!.Register("highlighted-collection-plugin", "Scripts/highlighted-collection-plugin.js");
+                    Initialized = true;
                 }
             }
         }

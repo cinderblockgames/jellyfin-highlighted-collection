@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
+using Jellyfin.Plugin.HighlightedCollection.Configuration;
 using MediaBrowser.Common.Plugins;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
@@ -14,7 +16,7 @@ namespace Jellyfin.Plugin.HighlightedCollection;
 /// </summary>
 /// <param name="plugin">The plugin for which this script is being managed.</param>
 /// <param name="logger">Logger for reporting success/failure.</param>
-public class ScriptManager(IPlugin plugin, ILogger<Plugin> logger)
+public class ScriptManager(BasePlugin<PluginConfiguration> plugin, ILogger<Plugin> logger)
 {
     /// <summary>
     /// Registers the specified script.
@@ -45,7 +47,7 @@ public class ScriptManager(IPlugin plugin, ILogger<Plugin> logger)
                     {
                         { "id", $"{plugin.Id}-{name}" }, // Unique ID for your script
                         { "name", name },
-                        { "script", File.ReadAllText(path) },
+                        { "script", ReadFileAndReplacePlaceholders(path) },
                         { "enabled", true },
                         { "requiresAuthentication", true }, // Set to true if script should only run for logged-in users
                         { "pluginId", plugin.Id.ToString() },
@@ -71,5 +73,22 @@ public class ScriptManager(IPlugin plugin, ILogger<Plugin> logger)
         {
             logger?.LogError(ex, "Failed to register JavaScript with JavaScript Injector plugin.");
         }
+    }
+
+    private string ReadFileAndReplacePlaceholders(string path)
+    {
+        var file = File.ReadAllText(path);
+        var replacements = new Dictionary<string, string?>
+        {
+            { "##Collection##", plugin.Configuration.Collection.ToString() },
+            { "##Title##", plugin.Configuration.Title },
+            { "##SortOrder##", plugin.Configuration.SortOrder.ToString() }
+        };
+        foreach (var replacement in replacements)
+        {
+            file = file.Replace(replacement.Key, replacement.Value, StringComparison.OrdinalIgnoreCase);
+        }
+
+        return file;
     }
 }

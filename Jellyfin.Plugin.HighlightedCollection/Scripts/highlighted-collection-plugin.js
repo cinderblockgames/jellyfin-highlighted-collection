@@ -6,7 +6,9 @@
     "use strict";
 
     const CONFIG = {
-        plugin: "14D6403B-1065-4A19-9363-B258740652C6",
+        Collection: '##Collection##',
+        Title: '##Title##',
+        SortOrder: '##SortOrder##',
     };
 
     // Real problems only — no verbose tracing.
@@ -26,20 +28,20 @@
     }
 
     /** Fetches a collection's first 16 child items, sorted by highlighted: tag (if DateAddedToCollection is the SortOrder). */
-    function fetchCollectionItems(config) {
+    function fetchCollectionItems() {
         const api = getApiClient();
 
         let options = {
-            ParentId: config.Collection,
+            ParentId: CONFIG.Collection,
             Limit: 16
         };
 
-        if (config.SortOrder == "Name") {
+        if (CONFIG.SortOrder == "Name") {
             options.SortBy = "SortName";
             options.SortOrder = "Ascending";
         }
 
-        if (config.SortOrder == "DateAddedToCollection") {
+        if (CONFIG.SortOrder == "DateAddedToCollection") {
             options.Fields = "Tags";
         } else {
             options.Fields = "PremiereDate";
@@ -48,14 +50,14 @@
         return api
             .getItems(api.getCurrentUserId(), options)
             .then((result) => {
-                if (config.SortOrder == "DateAddedToCollection") {
+                if (CONFIG.SortOrder == "DateAddedToCollection") {
                     result.Items.sort(sortByDate);
                 }
                 result.Items.slice(0, 16);
                 return result;
             })
             .catch((e) => {
-                err("getItems failed for", config.Collection, e);
+                err("getItems failed for", CONFIG.Collection, e);
                 throw e;
             });
     }
@@ -118,20 +120,20 @@
         return container;
     }
 
-    function buildSection(items, config) {
+    function buildSection(items) {
         if (items.TotalRecordCount > 0) {
             const api = getApiClient();
             let highlightedOuter = $('<div class="verticalSection emby-scroller-container" id="highlighted-collection"></div>');
 
             let highlighted = $('<div class="verticalSection emby-scroller-container"></div>');
             highlighted.append(
-                $('<div class="sectionTitleContainer sectionTitleContainer-cards padded-left"><a is="emby-linkbutton" href="#/details?id=' + config.Collection + '&amp;serverId=' + api.serverId() + '" class="more button-flat button-flat-mini sectionTitleTextButton emby-button"><h2 class="sectionTitle sectionTitle-cards">' + config.Title + '</h2><span class="material-icons chevron_right" aria-hidden="true"></span></a></div>')
+                $('<div class="sectionTitleContainer sectionTitleContainer-cards padded-left"><a is="emby-linkbutton" href="#/details?id=' + CONFIG.Collection + '&amp;serverId=' + api.serverId() + '" class="more button-flat button-flat-mini sectionTitleTextButton emby-button"><h2 class="sectionTitle sectionTitle-cards">' + CONFIG.Title + '</h2><span class="material-icons chevron_right" aria-hidden="true"></span></a></div>')
             );
             let detailsOuter = $('<div is="emby-scroller" class="padded-top-focusscale padded-bottom-focusscale emby-scroller" data-centerfocus="true" data-scroll-mode-x="custom"></div>');
             let details = $('<div is="emby-itemscontainer" class="itemsContainer scrollSlider focuscontainer-x animatedScrollX" style="white-space: nowrap; will-change: transform; transition: transform 270ms ease-out; transform: translateX(0px);"></div>');
 
             for (let [index, item] of items.Items.entries()) {
-                details.append(buildPoster(item, index, config.SortOrder == "DateAddedToCollection"));
+                details.append(buildPoster(item, index, CONFIG.SortOrder == "DateAddedToCollection"));
             }
 
             detailsOuter.append(details);
@@ -151,9 +153,7 @@
                 warn("ApiClient not ready");
                 return Promise.reject(new Error("ApiClient not ready"));
             }
-            api.getPluginConfiguration(CONFIG.plugin).then(function (config) {
-                fetchCollectionItems(config).then((result) => buildSection(result, config));
-            });
+            fetchCollectionItems().then((result) => buildSection(result));
         }
     }
 
