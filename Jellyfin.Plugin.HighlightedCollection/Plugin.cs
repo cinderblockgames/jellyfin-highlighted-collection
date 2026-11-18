@@ -27,6 +27,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
         : base(applicationPaths, xmlSerializer)
     {
         Instance = this;
+        Logger = logger;
         var tagManager = new TagManager(() => Instance?.Configuration?.Collection, "highlighted");
         collections.ItemsAddedToCollection += tagManager.ItemsAddedToCollection;
         collections.ItemsRemovedFromCollection += tagManager.ItemsRemovedFromCollection;
@@ -43,9 +44,11 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     /// <summary>
     /// Gets or sets the current plugin instance.
     /// </summary>
-    private static Plugin? Instance { get; set; }
+    private Plugin Instance { get; set; }
 
-    private ScriptManager? ScriptManager { get; set;  }
+    private ScriptManager ScriptManager { get; }
+
+    private ILogger<Plugin> Logger { get; }
 
     private static object Deadbolt { get; } = new object();
 
@@ -61,7 +64,11 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
             {
                 if (!Initialized)
                 {
-                    ScriptManager!.Register("highlighted-collection-plugin", "Scripts/highlighted-collection-plugin.js");
+                    if (Instance.Configuration.Collection.HasValue)
+                    {
+                        ScriptManager.Register("highlighted-collection-plugin", "Scripts/highlighted-collection-plugin.js");
+                    }
+
                     Initialized = true;
                 }
             }
@@ -75,5 +82,22 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
                 EmbeddedResourcePath = string.Format(CultureInfo.InvariantCulture, "{0}.Configuration.configPage.html", GetType().Namespace)
             }
         ];
+    }
+
+    /// <summary>
+    /// Clean up scripts.
+    /// </summary>
+    /// <remarks>Does this trigger when disabling a plugin as well?  Needs testing.</remarks>
+    public override void OnUninstalling()
+    {
+        base.OnUninstalling();
+        try
+        {
+            ScriptManager.Unregister();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error encountered while unregistering scripts; skipping.");
+        }
     }
 }

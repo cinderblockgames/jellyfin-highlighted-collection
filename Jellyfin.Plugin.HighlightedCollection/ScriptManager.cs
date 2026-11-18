@@ -19,7 +19,7 @@ namespace Jellyfin.Plugin.HighlightedCollection;
 public class ScriptManager(BasePlugin<PluginConfiguration> plugin, ILogger<Plugin> logger)
 {
     /// <summary>
-    /// Registers the specified script.
+    /// Replaces placeholders in the specified script and registers it with JavaScript Injector.
     /// </summary>
     /// <param name="name">The name under which to register the script.</param>
     /// <param name="path">The JavaScript file to register.</param>
@@ -90,5 +90,42 @@ public class ScriptManager(BasePlugin<PluginConfiguration> plugin, ILogger<Plugi
         }
 
         return file;
+    }
+
+    /// <summary>
+    /// Removes all scripts for this plugin from JavaScript Injector.
+    /// </summary>
+    public void Unregister()
+    {
+        try
+        {
+            // Find the JavaScript Injector assembly
+            Assembly? jsInjectorAssembly = AssemblyLoadContext.All
+                .SelectMany(x => x.Assemblies)
+                .FirstOrDefault(x => x.FullName?.Contains("Jellyfin.Plugin.JavaScriptInjector",  StringComparison.Ordinal) ?? false);
+
+            if (jsInjectorAssembly != null)
+            {
+                Type? pluginInterfaceType = jsInjectorAssembly.GetType("Jellyfin.Plugin.JavaScriptInjector.PluginInterface");
+
+                if (pluginInterfaceType != null)
+                {
+                    var unregisterResult = pluginInterfaceType.GetMethod("UnregisterAllScriptsFromPlugin")?.Invoke(null, [plugin.Id.ToString()]);
+
+                    if (unregisterResult is int removedCount)
+                    {
+                        logger?.LogInformation("Successfully unregistered {Count} script(s) from JavaScript Injector plugin.", removedCount);
+                    }
+                    else
+                    {
+                        logger?.LogWarning("Failed to unregister scripts from JavaScript Injector plugin. Method returned unexpected value.");
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            logger?.LogError(ex, "Failed to unregister JavaScript scripts.");
+        }
     }
 }
