@@ -147,7 +147,7 @@
     }
 
     function display() {
-        if (window.location.href.endsWith("/web/#/home") && !$('#leaving-soon')[0]) {
+        if (window.location.href.endsWith("/web/#/home") && !$('#highlighted-collection')[0]) {
             const api = getApiClient();
             if (!api) {
                 warn("ApiClient not ready");
