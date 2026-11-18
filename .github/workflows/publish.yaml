@@ -16,3 +16,5 @@ jobs:
       deploy-host: ${{ secrets.DEPLOY_HOST }}
       deploy-user: ${{ secrets.DEPLOY_USER }}
       deploy-key: ${{ secrets.DEPLOY_KEY }}
+    permissions:
+      contents: write
