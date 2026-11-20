@@ -4,8 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using J2N.Text;
-using Jellyfin.Database.Implementations.Entities;
 using Jellyfin.Plugin.HighlightedCollection.Extensions;
+using Jellyfin.Plugin.HighlightedCollection.Infrastructure;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Controller.Collections;
 using MediaBrowser.Controller.Entities;
@@ -21,7 +21,7 @@ namespace Jellyfin.Plugin.HighlightedCollection;
 public class AddedToCollectionManager
 {
     private readonly string _directory;
-    private readonly User _accessor;
+    private readonly AdminUserRetriever _accessor;
     private readonly ILogger<Plugin> _logger;
     private static readonly ReaderWriterLockSlim _rwls = new();
 
@@ -32,7 +32,7 @@ public class AddedToCollectionManager
     /// <param name="collections">Instance of the <see cref="ICollectionManager"/> interface.</param>
     /// <param name="accessor">Admin user for viewing collection contents.</param>
     /// <param name="logger">Instance of the <see cref="ILogger"/> interface.</param>
-    public AddedToCollectionManager(IApplicationPaths paths, ICollectionManager collections, User accessor, ILogger<Plugin> logger)
+    public AddedToCollectionManager(IApplicationPaths paths, ICollectionManager collections, AdminUserRetriever accessor, ILogger<Plugin> logger)
     {
         paths = paths ?? throw new ArgumentNullException(nameof(paths));
         _directory = Path.Combine(paths.PluginsPath, "configurations", "Jellyfin.Plugin.HighlightedCollection");
@@ -111,7 +111,7 @@ public class AddedToCollectionManager
             modify?.Invoke(data);
 
             // Save only the items that currently exist in the collection; prevent orphaned state.
-            var newData = collection.GetItems(new InternalItemsQuery(_accessor) { ParentId = collection.Id })
+            var newData = collection.GetItems(new InternalItemsQuery(_accessor.AdminUser) { ParentId = collection.Id })
                 .Items
                 .ToDictionary(
                     item => item.Id,
