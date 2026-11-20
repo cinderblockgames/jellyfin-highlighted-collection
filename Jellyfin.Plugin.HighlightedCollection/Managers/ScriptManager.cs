@@ -47,7 +47,7 @@ public class ScriptManager(BasePlugin<PluginConfiguration> plugin, ILogger<Plugi
                     {
                         { "id", $"{plugin.Id}-{name}" }, // Unique ID for your script
                         { "name", name },
-                        { "script", ReadFileAndReplacePlaceholders(path) },
+                        { "script", File.ReadAllText(path) },
                         { "enabled", true },
                         { "requiresAuthentication", true }, // Set to true if script should only run for logged-in users
                         { "pluginId", plugin.Id.ToString() },
@@ -73,23 +73,6 @@ public class ScriptManager(BasePlugin<PluginConfiguration> plugin, ILogger<Plugi
         {
             logger?.LogError(ex, "Failed to register JavaScript with JavaScript Injector plugin.");
         }
-    }
-
-    private string ReadFileAndReplacePlaceholders(string path)
-    {
-        var file = File.ReadAllText(path);
-        var replacements = new Dictionary<string, string?>
-        {
-            { "##Collection##", plugin.Configuration.Collection.ToString() },
-            { "##Title##", plugin.Configuration.Title },
-            { "##SortOrder##", plugin.Configuration.SortOrder.ToString() }
-        };
-        foreach (var replacement in replacements)
-        {
-            file = file.Replace(replacement.Key, replacement.Value, StringComparison.OrdinalIgnoreCase);
-        }
-
-        return file;
     }
 
     /// <summary>

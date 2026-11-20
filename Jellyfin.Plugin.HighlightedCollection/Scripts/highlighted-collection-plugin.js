@@ -5,12 +5,6 @@
 (function () {
     "use strict";
 
-    const CONFIG = {
-        Collection: '##Collection##',
-        Title: '##Title##',
-        SortOrder: '##SortOrder##',
-    };
-
     // Real problems only — no verbose tracing.
     const warn = (...args) => console.warn("[highlighted-collection]", ...args);
     const err = (...args) => console.error("[highlighted-collection]", ...args);
@@ -28,20 +22,20 @@
     }
 
     /** Fetches a collection's first 16 child items, sorted by highlighted: tag (if DateAddedToCollection is the SortOrder). */
-    function fetchCollectionItems() {
+    function fetchCollectionItems(data) {
         const api = getApiClient();
 
         let options = {
-            ParentId: CONFIG.Collection,
+            ParentId: data.Config.Collection,
             Limit: 16
         };
 
-        if (CONFIG.SortOrder == "Name") {
+        if (data.Config.SortOrder == "Name") {
             options.SortBy = "SortName";
             options.SortOrder = "Ascending";
         }
 
-        if (CONFIG.SortOrder == "DateAddedToCollection") {
+        if (data.Config.SortOrder == "DateAddedToCollection") {
             options.Fields = "Tags";
         } else {
             options.Fields = "PremiereDate";
@@ -50,46 +44,31 @@
         return api
             .getItems(api.getCurrentUserId(), options)
             .then((result) => {
-                if (CONFIG.SortOrder == "DateAddedToCollection") {
+                if (data.Config.SortOrder == "DateAddedToCollection") {
+                    result.Items.forEach(item => item.DateAddedToCollection = data.AddedDates[item.Id]);
                     result.Items.sort(sortByDate);
                 }
                 result.Items.slice(0, 16);
                 return result;
             })
             .catch((e) => {
-                err("getItems failed for", CONFIG.Collection, e);
+                err("getItems failed for", data.config.Collection, e);
                 throw e;
             });
     }
 
     function sortByDate(a, b) {
-        let aTags = a.Tags.filter(tag => tag.startsWith("highlighted:"));
-        let bTags = b.Tags.filter(tag => tag.startsWith("highlighted:"));
-        let aTagCount = aTags.length;
-        let bTagCount = bTags.length;
-        if (aTagCount == 0 && bTagCount == 0) {
-            return 0; // keep original sorting
-        }
-        if (aTagCount == 0) {
-            return 1; // put a after b
-        }
-        if (bTagCount == 0) {
+        if (a.DateAddedToCollection < b.DateAddedToCollection) {
             return -1; // put a before b
         }
-
-        let aTag = aTags[0];
-        let bTag = bTags[0];
-        if (aTag < bTag) {
-            return -1; // put a before b
-        }
-        if (aTag > bTag) {
+        if (a.DateAddedToCollection > b.DateAddedToCollection) {
             return 1; // put b after a
         }
         return 0; // keep original sorting
     }
 
     /** Collection display. */
-    function buildPoster(item, index, dateAdded) {
+    function buildPoster(item, index, showDateAdded) {
         const api = getApiClient();
         let container = $('<div data-index="' + index + '" data-isfolder="false" data-serverid="' + item.ServerId + '" data-id="' + item.Id + '" data-type="' + item.Type + '" data-mediatype="' + item.MediaType + '" data-path="" data-context="home" data-prefix="RES" class="card overflowPortraitCard card-hoverable card-withuserdata"></div>');
         let cardBox = $('<div class="cardBox cardBox-bottompadded"></div>');
@@ -108,9 +87,8 @@
         cardBox.append(cardTextFirst);
 
         let cardTextSecond = $('<div class="cardText cardTextCentered cardText-secondary"></div>');
-        if (dateAdded) {
-            let tag = item.Tags.filter(tag => tag.startsWith("highlighted:"));
-            if (tag.length > 0) cardTextSecond.append($('<bdi>' + tag[0].substring(12) + '</bdi>'));
+        if (showDateAdded) {
+            if (item.DateAddedToCollection) cardTextSecond.append($('<bdi>' + item.DateAddedToCollection + '</bdi>'));
         } else if (item.PremiereDate) {
             cardTextSecond.append($('<bdi>' + item.PremiereDate.substring(0, 4) + '</bdi>'));
         }
@@ -120,20 +98,20 @@
         return container;
     }
 
-    function buildSection(items) {
-        if (items.TotalRecordCount > 0) {
+    function buildSection(items, data) {
+        if (items && items.TotalRecordCount > 0) {
             const api = getApiClient();
             let highlightedOuter = $('<div class="verticalSection emby-scroller-container" id="highlighted-collection"></div>');
 
             let highlighted = $('<div class="verticalSection emby-scroller-container"></div>');
             highlighted.append(
-                $('<div class="sectionTitleContainer sectionTitleContainer-cards padded-left"><a is="emby-linkbutton" href="#/details?id=' + CONFIG.Collection + '&amp;serverId=' + api.serverId() + '" class="more button-flat button-flat-mini sectionTitleTextButton emby-button"><h2 class="sectionTitle sectionTitle-cards">' + CONFIG.Title + '</h2><span class="material-icons chevron_right" aria-hidden="true"></span></a></div>')
+                $('<div class="sectionTitleContainer sectionTitleContainer-cards padded-left"><a is="emby-linkbutton" href="#/details?id=' + data.Config.Collection + '&amp;serverId=' + api.serverId() + '" class="more button-flat button-flat-mini sectionTitleTextButton emby-button"><h2 class="sectionTitle sectionTitle-cards">' + data.Config.Title + '</h2><span class="material-icons chevron_right" aria-hidden="true"></span></a></div>')
             );
             let detailsOuter = $('<div is="emby-scroller" class="padded-top-focusscale padded-bottom-focusscale emby-scroller" data-centerfocus="true" data-scroll-mode-x="custom"></div>');
             let details = $('<div is="emby-itemscontainer" class="itemsContainer scrollSlider focuscontainer-x animatedScrollX" style="white-space: nowrap; will-change: transform; transition: transform 270ms ease-out; transform: translateX(0px);"></div>');
 
             for (let [index, item] of items.Items.entries()) {
-                details.append(buildPoster(item, index, CONFIG.SortOrder == "DateAddedToCollection"));
+                details.append(buildPoster(item, index, data.Config.SortOrder == "DateAddedToCollection"));
             }
 
             detailsOuter.append(details);
@@ -153,7 +131,11 @@
                 warn("ApiClient not ready");
                 return Promise.reject(new Error("ApiClient not ready"));
             }
-            fetchCollectionItems().then((result) => buildSection(result));
+            api.getJSON(api.getUrl('/HighlightedCollection/CollectionData'))
+                .then(data => {
+                    if (!data) return;
+                    fetchCollectionItems(data).then(items => buildSection(items, data));
+                });
         }
     }
 

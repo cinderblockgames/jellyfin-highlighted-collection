@@ -17,5 +17,5 @@ public class HighlightedCollectionData
     /// <summary>
     /// Gets or sets the dates data.
     /// </summary>
-    public required IReadOnlyDictionary<Guid, string?> AddedDates { get; set; }
+    public required IReadOnlyDictionary<string, string?> AddedDates { get; set; }
 }

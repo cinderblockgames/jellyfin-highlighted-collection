@@ -58,7 +58,9 @@ public class CollectionDataController(
             new HighlightedCollectionData
             {
                 Config = config,
-                AddedDates = dates.AsReadOnly()
+                AddedDates = dates.ToDictionary(
+                    kvp => kvp.Key.ToString("N"),
+                    kvp => kvp.Value).AsReadOnly()
             });
     }
 
