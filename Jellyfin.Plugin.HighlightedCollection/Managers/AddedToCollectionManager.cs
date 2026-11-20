@@ -13,7 +13,7 @@ using MediaBrowser.Controller.Entities.Movies;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
-namespace Jellyfin.Plugin.HighlightedCollection;
+namespace Jellyfin.Plugin.HighlightedCollection.Managers;
 
 /// <summary>
 /// Tracks when items are added to a collection.
@@ -111,7 +111,7 @@ public class AddedToCollectionManager
             modify?.Invoke(data);
 
             // Save only the items that currently exist in the collection; prevent orphaned state.
-            var newData = collection.GetItems(new InternalItemsQuery(_accessor.AdminUser) { ParentId = collection.Id })
+            var newData = collection.GetItems(new InternalItemsQuery(_accessor.AdminUser))
                 .Items
                 .ToDictionary(
                     item => item.Id,

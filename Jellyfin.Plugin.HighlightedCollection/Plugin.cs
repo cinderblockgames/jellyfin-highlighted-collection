@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Jellyfin.Plugin.HighlightedCollection.Configuration;
+using Jellyfin.Plugin.HighlightedCollection.Managers;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;
 using MediaBrowser.Model.Plugins;
@@ -43,9 +44,10 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     public override Guid Id => Guid.Parse("14D6403B-1065-4A19-9363-B258740652C6");
 
     /// <summary>
-    /// Gets or sets the current plugin instance.
+    /// Gets the current plugin instance.
     /// </summary>
-    private Plugin Instance { get; set; }
+    /// <remarks>Following JellyfinEnhanced's pattern on making this public static.</remarks>
+    public static Plugin? Instance { get; private set; }
 
     private AddedToCollectionManager AddedToCollectionManager { get; }
 
@@ -67,7 +69,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
             {
                 if (!Initialized)
                 {
-                    if (Instance.Configuration.Collection.HasValue)
+                    if (Instance!.Configuration.Collection.HasValue)
                     {
                         ScriptManager.Register("highlighted-collection-plugin", "Scripts/highlighted-collection-plugin.js");
                     }

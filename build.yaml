@@ -18,3 +18,4 @@ version: "0.4.0.0"
 changelog: >
   0.4.0.0: Tracking added-to-collection data in files instead of tags, as tags get overwritten.
   This also allows me to track for all collections without cluttering up the UI.
+  Providing a service for the JavaScript to use to pull the data so we don't have to inject it into the JavaScript itself.

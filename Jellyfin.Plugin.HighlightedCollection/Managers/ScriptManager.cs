@@ -9,7 +9,7 @@ using MediaBrowser.Common.Plugins;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 
-namespace Jellyfin.Plugin.HighlightedCollection;
+namespace Jellyfin.Plugin.HighlightedCollection.Managers;
 
 /// <summary>
 /// Initializes a new instance of the <see cref="ScriptManager"/> class.
