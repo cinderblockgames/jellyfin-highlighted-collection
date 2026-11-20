@@ -9,6 +9,9 @@
     <AnalysisMode>AllEnabledByDefault</AnalysisMode>
     <AssemblyName>Jellyfin.Plugin.HighlightedCollection</AssemblyName>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+    <AssemblyVersion>0.3.0.2</AssemblyVersion>
+  </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Jellyfin.Controller" Version="10.11.5" >

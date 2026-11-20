@@ -1,12 +1,20 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
+using Jellyfin.Database.Implementations;
+using Jellyfin.Database.Implementations.Entities;
+using Jellyfin.Database.Implementations.Enums;
 using Jellyfin.Plugin.HighlightedCollection.Configuration;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;
 using MediaBrowser.Controller.Collections;
+using MediaBrowser.Controller.Entities;
+using MediaBrowser.Controller.Library;
+using MediaBrowser.Model.Library;
 using MediaBrowser.Model.Plugins;
 using MediaBrowser.Model.Serialization;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.HighlightedCollection;
@@ -22,15 +30,28 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     /// <param name="applicationPaths">Instance of the <see cref="IApplicationPaths"/> interface.</param>
     /// <param name="xmlSerializer">Instance of the <see cref="IXmlSerializer"/> interface.</param>
     /// <param name="collections">Instance of the <see cref="ICollectionManager"/> interface.</param>
+    /// <param name="database">Instance of the <see cref="IJellyfinDatabaseProvider"/> interface.</param>
+    /// <param name="users">Instance of the <see cref="IUserManager"/> interface.</param>
     /// <param name="logger">Instance of the <see cref="ILogger"/> interface.</param>
-    public Plugin(IApplicationPaths applicationPaths, IXmlSerializer xmlSerializer, ICollectionManager collections, ILogger<Plugin> logger)
+    public Plugin(
+        IApplicationPaths applicationPaths,
+        IXmlSerializer xmlSerializer,
+        ICollectionManager collections,
+        IJellyfinDatabaseProvider database,
+        IUserManager users,
+        ILogger<Plugin> logger)
         : base(applicationPaths, xmlSerializer)
     {
+        var adminUserId = database.DbContextFactory!.CreateDbContext()
+            .Users
+            .Include(user => user.Permissions)
+            .First(user => user.Permissions.Any(perm => perm.Kind == PermissionKind.IsAdministrator && perm.Value))
+            .Id;
+        var adminUser = users.GetUserById(adminUserId)!;
+
         Instance = this;
         Logger = logger;
-        var tagManager = new TagManager(() => Instance?.Configuration?.Collection, "highlighted");
-        collections.ItemsAddedToCollection += tagManager.ItemsAddedToCollection;
-        collections.ItemsRemovedFromCollection += tagManager.ItemsRemovedFromCollection;
+        AddedToCollectionManager = new AddedToCollectionManager(applicationPaths, collections, adminUser, logger);
         ScriptManager = new ScriptManager(Instance, logger);
         Instance.ConfigurationChanged += (_, _) => ScriptManager.Register("highlighted-collection-plugin", "Scripts/highlighted-collection-plugin.js");
     }
@@ -45,6 +66,8 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     /// Gets or sets the current plugin instance.
     /// </summary>
     private Plugin Instance { get; set; }
+
+    private AddedToCollectionManager AddedToCollectionManager { get; }
 
     private ScriptManager ScriptManager { get; }
 

@@ -14,6 +14,7 @@ artifacts:
 - "Jellyfin.Plugin.HighlightedCollection.dll"
 - "Scripts/highlighted-collection-plugin.js"
 
-version: "0.3.0.2"
+version: "0.4.0.0"
 changelog: >
-  0.3.0.2: Fixing duplication caused by rename from leaving-soon to highlighted-collection.
+  0.4.0.0: Tracking added-to-collection data in files instead of tags, as tags get overwritten.
+  This also allows me to track for all collections without cluttering up the UI.
