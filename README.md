@@ -14,7 +14,7 @@ The settings for this plugin are straightforward:
 - Highlighted Collection: this is the collection you want to appear at the top of your home screen for your users.
 - Sort Order: this is the order in which to sort the items in the collection.  The first 16 items will appear, and the rest can be accessed by clicking on the section header.
   - Jellyfin default: does not force an ordering; renders in the order returned by Jellyfin.  (This appears to currently be in ascending PremiereDate.)
-  - Date added to collection: the plugin tracks the date items are added to the selected collection using a tag that starts witih **highlighted:**; using this ordering will go in ascending order.  This is particularly useful for a leaving soon collection.  (Note: the plugin only manages this tag for the selected collection, and it can only do so after it's installed.  There's no native data to support this.)
+  - Date added to collection: the plugin tracks the date items are added to collections; using this ordering will go in ascending order.  This is particularly useful for a leaving soon collection.  (Note: the plugin can only track this date after it's installed; there is no native data to support this.)
   - Name (SortName): alphabetical by SortName (which is slightly different than Name by default in order to make sorting more predictable).
 
 ## Required Plugins
