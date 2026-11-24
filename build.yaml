@@ -17,4 +17,6 @@ artifacts:
 version: "0.4.1.0"
 changelog: >
   0.4.1.0: Removed extra Tags include.
-  Placing highlighted collection below My Media if My Media is the first section.
+  Placed highlighted collection below My Media if My Media is the first section.
+  Fixed which items get shown for DateAddedToCollection to respect the full ordering.
+  Removed script re-registration on configuration change - no longer needed.

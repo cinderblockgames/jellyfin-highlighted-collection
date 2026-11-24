@@ -34,7 +34,6 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
         Logger = logger;
         AddedToCollectionManager = addedToCollectionManager;
         ScriptManager = new ScriptManager(Instance, logger);
-        Instance.ConfigurationChanged += (_, _) => ScriptManager.Register("highlighted-collection-plugin", "Scripts/highlighted-collection-plugin.js");
     }
 
     /// <inheritdoc />

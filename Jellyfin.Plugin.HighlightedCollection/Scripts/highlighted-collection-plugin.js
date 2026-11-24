@@ -35,7 +35,9 @@
             options.SortOrder = "Ascending";
         }
 
-        if (data.Config.SortOrder != "DateAddedToCollection") {
+        if (data.Config.SortOrder == "DateAddedToCollection") {
+            options.Ids = Object.keys(data.AddedDates);
+        } else {
             options.Fields = "PremiereDate";
         }
 
@@ -137,7 +139,7 @@
                 warn("ApiClient not ready");
                 return Promise.reject(new Error("ApiClient not ready"));
             }
-            api.getJSON(api.getUrl('/HighlightedCollection/CollectionData'))
+            api.getJSON(api.getUrl('/HighlightedCollection/CollectionData?count=16'))
                 .then(data => {
                     if (!data) return;
                     fetchCollectionItems(data).then(items => buildSection(items, data));

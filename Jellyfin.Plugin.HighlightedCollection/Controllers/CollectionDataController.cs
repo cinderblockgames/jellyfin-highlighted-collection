@@ -30,8 +30,9 @@ public class CollectionDataController(
     /// <summary>
     /// GET.
     /// </summary>
+    /// <param name="count">Number of records to return.</param>
     /// <returns>Config and dates (or null).</returns>
-    public IActionResult Index()
+    public IActionResult Index([FromQuery] int count = 16)
     {
         var config = Plugin.Instance!.Configuration;
         if (!config.Collection.HasValue)
@@ -58,9 +59,11 @@ public class CollectionDataController(
             new HighlightedCollectionData
             {
                 Config = config,
-                AddedDates = dates.ToDictionary(
-                    kvp => kvp.Key.ToString("N"),
-                    kvp => kvp.Value).AsReadOnly()
+                AddedDates = dates.OrderBy(kvp => kvp.Value, StringComparer.OrdinalIgnoreCase)
+                    .Take(count)
+                    .ToDictionary(
+                        kvp => kvp.Key.ToString("N"),
+                        kvp => kvp.Value).AsReadOnly()
             });
     }
 
