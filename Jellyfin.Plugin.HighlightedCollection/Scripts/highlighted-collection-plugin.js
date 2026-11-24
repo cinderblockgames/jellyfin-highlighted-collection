@@ -35,9 +35,7 @@
             options.SortOrder = "Ascending";
         }
 
-        if (data.Config.SortOrder == "DateAddedToCollection") {
-            options.Fields = "Tags";
-        } else {
+        if (data.Config.SortOrder != "DateAddedToCollection") {
             options.Fields = "PremiereDate";
         }
 
@@ -119,8 +117,16 @@
 
             highlightedOuter.append(highlighted);
 
-            // Might take a split second for section1 to show up.
-            setTimeout(() => $(".homeSectionsContainer").prepend(highlightedOuter), 100);
+            // Might take a split second for container to show up.
+            setTimeout(() => addSection(highlightedOuter), 100);
+        }
+    }
+
+    function addSection(section) {
+        if ($(".homeSectionsContainer > div:first-child h2").text() == "My Media") {
+            $(".homeSectionsContainer > div:first-child").after(section);
+        } else {
+            $(".homeSectionsContainer").prepend(section);
         }
     }
 
