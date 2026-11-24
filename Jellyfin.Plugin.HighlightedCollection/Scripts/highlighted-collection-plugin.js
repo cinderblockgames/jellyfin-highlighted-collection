@@ -88,7 +88,7 @@
 
         let cardTextSecond = $('<div class="cardText cardTextCentered cardText-secondary"></div>');
         if (showDateAdded) {
-            if (item.DateAddedToCollection) cardTextSecond.append($('<bdi>' + item.DateAddedToCollection + '</bdi>'));
+            if (item.DateAddedToCollection) cardTextSecond.append($('<bdi>Added ' + item.DateAddedToCollection + '</bdi>'));
         } else if (item.PremiereDate) {
             cardTextSecond.append($('<bdi>' + item.PremiereDate.substring(0, 4) + '</bdi>'));
         }
